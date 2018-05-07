@@ -1,0 +1,7 @@
+{
+  "name": "haxe-format-vox-examples-js",
+  "license": "zlib",
+  "dependencies": {
+    "@sh-dave/format-vox": "^0.1.1"
+  }
+}
