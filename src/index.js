@@ -9,6 +9,22 @@ let indent = 0;
 
 const ind = ( o = 0 ) => Array(indent + o).join(' ');
 
+const dictData = ( dict ) => {
+	let result = '';
+
+	if (Tools.dictHasTranslation(dict)) {
+		const t = Tools.getTranslationFromDict(dict);
+		result += ` translation: ${t.x}/${t.y}/${t.z}; `;
+	}
+
+	if (Tools.dictHasRotation(dict)) {
+		const r = Tools.getRotationFromDict(dict);
+		result += ` rotation: ${r._00}/${r._10}/${r._20}/${r._01}/${r._11}/${r._21}/${r._02}/${r._12}/${r._22}; `;
+	}
+		
+	return result.length > 0 ? `(${result}) ` : result;
+}
+
 const walker = {
 	beginGraph: vox => {
 	},
@@ -16,10 +32,14 @@ const walker = {
 	endGraph: vox => {
 	},
 
+	// can have a Group or Shape as child
+	onTransform: attributes => {
+		console.log(`${ind()}transform ${dictData(attributes)}`);
+		indent += 2;
+	},
+
 	beginGroup: attributes => {		
-		const t = Tools.getTranslationFromDict(attributes, '_t');
-		const r = Tools.getRotationFromDict(attributes, '_r');
-		console.log(`${ind()}group (translation: ${t.x}/${t.y}/${t.z}; rotation: ${r._00}/${r._10}/${r._20}/${r._01}/${r._11}/${r._21}/${r._02}/${r._12}/${r._22};)`);
+		console.log(`${ind()}group ${dictData(attributes)}`);
 		indent += 2;
 	},
 
@@ -28,19 +48,9 @@ const walker = {
 		console.log(`${ind()}/group`);
 	},
 
-	onTransform: attributes => {
-		const t = Tools.getTranslationFromDict(attributes, '_t');
-		const r = Tools.getRotationFromDict(attributes, '_r');
-		console.log(`${ind()}transform (translation: ${t.x}/${t.y}/${t.z}; rotation: ${r._00}/${r._10}/${r._20}/${r._01}/${r._11}/${r._21}/${r._02}/${r._12}/${r._22};)`);
-		indent += 2;
-	},
-
 	onShape: (attributes, models) => {
-		const t = Tools.getTranslationFromDict(attributes, '_t');
-		const r = Tools.getRotationFromDict(attributes, '_r');
-		console.log(`${ind()}shape {\n${ind(2)}translation: ${t.x}/${t.y}/${t.z};\n${ind(2)}rotation: ${r._00}/${r._10}/${r._20}/${r._01}/${r._11}/${r._21}/${r._02}/${r._12}/${r._22};`);
-		let modelIds = models.map(m => m.modelId);
-		console.log(`${ind(2)}models: [${modelIds.join(',')}];`);
+		console.log(`${ind()}shape ${dictData(attributes)} {`);
+		console.log(`${ind(2)}models: [${models.map(m => m.modelId).join(',')}];`);
 		console.log(`${ind()}}`);
 		indent -= 2;
 	}
